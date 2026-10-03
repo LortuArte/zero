@@ -104,6 +104,9 @@ func Resolve(options ResolveOptions) (ResolvedConfig, error) {
 		// trusted global-config merge, which must keep honouring the setting.
 		commandConfig.Sandbox.Enabled = nil
 		commandConfig.CrossSessionInbound = ""
+		// External provider commands cannot relax the user cap.
+		mergeModelRPM(&cfg.ModelRPM, commandConfig.ModelRPM, true)
+		commandConfig.ModelRPM = nil
 		mergeConfig(&cfg, commandConfig)
 	}
 
@@ -180,6 +183,7 @@ func Resolve(options ResolveOptions) (ResolvedConfig, error) {
 	}
 
 	return ResolvedConfig{
+		ModelRPM:            cfg.ModelRPM,
 		ActiveProvider:      active.Name,
 		Providers:           providers,
 		Provider:            active,
@@ -248,6 +252,7 @@ func loadConfigFile(path string) (FileConfig, error) {
 }
 
 func mergeConfig(dst *FileConfig, src FileConfig) {
+	mergeModelRPM(&dst.ModelRPM, src.ModelRPM, false)
 	if activeProvider := strings.TrimSpace(src.ActiveProvider); activeProvider != "" {
 		dst.ActiveProvider = activeProvider
 	}
@@ -309,6 +314,7 @@ func mergeConfig(dst *FileConfig, src FileConfig) {
 }
 
 func mergeProjectConfig(dst *FileConfig, src FileConfig) error {
+	mergeModelRPM(&dst.ModelRPM, src.ModelRPM, true)
 	if activeProvider := strings.TrimSpace(src.ActiveProvider); activeProvider != "" {
 		dst.ActiveProvider = activeProvider
 	}
