@@ -1166,10 +1166,13 @@ func TestResolveKeepsNormalizedProvidersWhenNoneMarkedActive(t *testing.T) {
 	// activeProvider is blank/stale — a caller like the interactive TUI still
 	// needs the normalized list to fall back to an already-usable provider
 	// instead of forcing a full re-onboarding wizard.
-	path := writeConfig(t, `{"providers":[
-		{"name":"work","provider_kind":"openai","apiKey":"sk-test","model":"gpt-test"},
-		{"name":"other","provider_kind":"openai","apiKey":"sk-other","model":"gpt-test"}
-	]}`)
+	path := writeConfig(t, `{
+    "modelRPM":{"gpt-test":1},
+    "providers":[
+        {"name":"work","provider_kind":"openai","apiKey":"sk-test","model":"gpt-test"},
+        {"name":"other","provider_kind":"openai","apiKey":"sk-other","model":"gpt-test"}
+    ]
+}`)
 
 	resolved, err := Resolve(ResolveOptions{ProjectConfigPath: path, Env: map[string]string{}})
 	if !errors.Is(err, ErrNoActiveProvider) {
@@ -1177,6 +1180,9 @@ func TestResolveKeepsNormalizedProvidersWhenNoneMarkedActive(t *testing.T) {
 	}
 	if len(resolved.Providers) != 2 {
 		t.Fatalf("Providers = %#v, want the 2 normalized profiles preserved despite the error", resolved.Providers)
+	}
+	if got := resolved.ModelRPM["gpt-test"]; got != 1 {
+		t.Fatalf("ModelRPM[gpt-test] = %d, want 1 preserved despite ErrNoActiveProvider", got)
 	}
 }
 

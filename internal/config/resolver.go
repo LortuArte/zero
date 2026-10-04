@@ -166,6 +166,7 @@ func Resolve(options ResolveOptions) (ResolvedConfig, error) {
 		// dropping them would let the TUI's unconfigured notify default overwrite
 		// a stored explicit opt-out on startup (maintainer review, PR #1001).
 		partial := ResolvedConfig{
+			ModelRPM:            cfg.ModelRPM,
 			Providers:           providers,
 			MaxTurns:            cfg.MaxTurns,
 			MCP:                 cfg.MCP,
