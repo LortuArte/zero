@@ -1109,6 +1109,34 @@ func TestResolveProviderCommandOverridesEnvProviderFields(t *testing.T) {
 	}
 }
 
+func TestResolveProviderCommandCannotRelaxUserModelRPM(t *testing.T) {
+	userPath := writeConfig(t, `{
+		"modelRPM": {
+			"gpt-command": 5
+		}
+	}`)
+
+	command := writeCommand(t, commandScript{
+	Stdout: `{"activeProvider":"cmd","providers":[{"name":"cmd","provider":"openai","apiKey":"sk-command","model":"gpt-command"}],"modelRPM":{"gpt-command":10}}`,
+})
+
+	resolved, err := Resolve(ResolveOptions{
+		UserConfigPath:  userPath,
+		ProviderCommand: command,
+		Env:             map[string]string{},
+	})
+	if err != nil {
+		t.Fatalf("Resolve() error = %v", err)
+	}
+
+	if got := resolved.ModelRPM["gpt-command"]; got != 5 {
+		t.Fatalf(
+			"ModelRPM[gpt-command] = %d, want user cap 5 preserved against provider-command relaxation",
+			got,
+		)
+	}
+}
+
 func TestResolveAllowsNoConfiguredProviders(t *testing.T) {
 	resolved, err := Resolve(ResolveOptions{Env: map[string]string{}})
 	if err != nil {
