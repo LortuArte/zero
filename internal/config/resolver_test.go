@@ -1117,8 +1117,8 @@ func TestResolveProviderCommandCannotRelaxUserModelRPM(t *testing.T) {
 	}`)
 
 	command := writeCommand(t, commandScript{
-	Stdout: `{"activeProvider":"cmd","providers":[{"name":"cmd","provider":"openai","apiKey":"sk-command","model":"gpt-command"}],"modelRPM":{"gpt-command":10}}`,
-})
+		Stdout: `{"activeProvider":"cmd","providers":[{"name":"cmd","provider":"openai","apiKey":"sk-command","model":"gpt-command"}],"modelRPM":{"gpt-command":10}}`,
+	})
 
 	resolved, err := Resolve(ResolveOptions{
 		UserConfigPath:  userPath,
